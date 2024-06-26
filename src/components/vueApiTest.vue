@@ -5,12 +5,13 @@
   
 import Inject from '@/components/Inject.vue'
 
+import { ref, reactive } from 'vue'
 
-const a = defineProps({
-  test : Number,
-})
+// const a = defineProps({
+//   test : Number,
+// })
 
-console.log('inject1', a.test)
+// console.log('inject1', a.test)
   // 제공: 반응형 값
 // const count = ref(0)
 // provide('count', count)
@@ -18,11 +19,18 @@ console.log('inject1', a.test)
 // // 제공: 심볼(Symbol) 키
 // provide('test', count)
 
+const msg = ref("<div style='color:red'>안녕</div>")
 
+const arr = ref([
+  { id : 1, item : '1'},
+  { id : 2, item : '2'},
+  { id : 3, item : '3'},
+])
 </script>
 
 <template>
-  <Inject :test2="a.test" />
+  <!-- v-bind -> : 가 요약어로  쓰이지만 해당 $props 인자 자체 넘길때처럼은 v-bind를 적어서 주자 :$props는 불가하니 어차피 해당 이름을 보내야한다 그럼 (그렇데해도 되고 props만 넘길거면 저럴때만 v-bind로 명시하자 : 요약어 말고) -->
+  <Inject v-bind="$props" />
 </template>
 
 
