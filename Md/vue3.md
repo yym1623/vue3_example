@@ -461,3 +461,134 @@ vue3에선 컴포지션 API에서 참조는 이름이 변수명과 일치하는 
 
 엘리먼트 연결할땐 변수명 같게하고 엘리먼트가 초기값 null로하고
 반응형일땐 엘리먼트 ref랑 이름 안 같게 구분해서 초기값은 해당 사용될값으로 넣는다 빈값이거나 -> 하지만 초기값은 쓰게될 데이터의 형식에 맞게 넣는게 좋다 ts면 더더욱 그래야 넣어지니까
+
+
+
+defineComponnets & components 동적 컴포넌트에 대한설명
+
+
+defineComponents -> 동적 컴포넌트랑 관련이는게 아닌
+
+기본 내보내기는 일반 객체 또는 defineComponent의 반환 값으로 Vue 컴포넌트 옵션 객체여야 합니다.
+
+타입추론을 위한 선언이지 동적컴포넌트관련이 아니다
+타입 추론으로 Vue 컴포넌트를 정의하기 위한 타입 핼퍼입니다
+
+components 태그가 동적 컴포넌트랑 관련있다 is를 이용해 뭘 동적인진 검색
+
+이 두가지 햇갈린거
+definecomponents - 동적 컴포넌트가 아닌 타입추론을 위한 컴ㅂ포넌트 선언이다 아마 전역사용을 위한 각각 main.js에서 선언하는
+
+components -> is를 이용한 동적컴포넌트 -> 뭘 변할때 동적인지 검색 -> 아마 옵션처럼 item[item + 1] 처럼 동적관련일거다 이걸 킵 얼라이브 감싸서 뭘 연결해서 하는건 검색
+
+
+
+components - 동적컴포넌트인데 동적컴포넌트로 만드는 이유가 삼항연산자처럼 조건에 따라서 이거나오고 저거나오고 해당 조건 이유때문인가 이건 컴포넌트들 v-if로 조건으로도 가능할텐데 
+
+다른 이유 있나 보자
+![alt text](image-9.png)
+
+
+그리고 script setup에선 컴포넌트를 import한거 바로 변수처럼 넣고 함수도 그렇지만(dom으로 만든거라면 나타내주는거라던가)
+
+컴포넌트에대해서 해당 파일에서 자신의 이름으로 컴포넌트 생성하면 본인참조가능 -> import로 이름겹치면 우선순위 낮아지지만 해당 import를 객체구조분해든 뭐든 *로 알리아스로 변경해서 사용가능
+->import { FooBar as FooBarChild } from './components' -> 해당 폴더에서 객체구조분해로 파일선택이 vue확장자 빼고 가능해서 저렇게 한건지 검색 파일까직머색하면 객체구조분해없이해도 되니까 전자가 맞을거 같음 일단 저렇게 알리아스로 본인 컴포넌트에서 본인참조하면 우선순위 낮으니 겹치면 저렇게 해서 피할수있음 import가 높지만 겹쳐서 못쓰게되는거 방지해서 알리아스로 뺀다
+
+네임스페이스 컴포넌트
+
+`<Foo.Bar>`와 같이 점이 있는 컴포넌트 태그를 사용하여, 객체 내부에 중첩된 속성으로 컴포넌트를 참조할 수 있습니다. 단일 파일에서 여러 컴포넌트를 가져올 때 유용합니다:
+
+```js
+<script setup>
+import * as Form from './form-components'
+</script>
+
+<template>
+  <Form.Input>
+    <Form.Label>레이블</Form.Label>
+  </Form.Input>
+</template>
+```
+
+커스텀 디렉티브 사용
+el로 만들어 전역적인(해당 페이지에서만?) 옵션을 만들 수 있음
+```js
+<script setup>
+const vMyDirective = {
+  beforeMount: (el) => {
+    // 엘리먼트(el)로 작업을 할 수 있음
+  }
+}
+</script>
+<template>
+  <h1 v-my-directive>이것은 제목입니다!</h1>
+</template>
+```
+
+완전한 타입 추론을 지원하는 props 및 emits와 같은 옵션을 선언하려면, <script setup> 내에서 자동으로 사용할 수 있는 defineProps 및 defineEmits API를 사용합니다:
+-> vue3 script setup 기준
+
+setup함수론 아마 import로 가져와서 가능할거다 같은 setup이라 
+script setip은 import없이 바로 내장으로 사용가능
+script setip용 타입추론이 업그레이드된 pros, emit느낌
+
+
+
+
+### defineExpose()# - 전역
+<script setup>을 사용하는 컴포넌트는 기본적으로 닫혀 있습니다. 즉, 템플릿 참조 또는 $parent 체인을 통해 검색되는 컴포넌트의 공개 인스턴스는 <script setup> 내부에서 선언된 바인딩을 노출하지 않습니다.
+
+<script setup> 컴포넌트의 속성을 명시적으로 노출하려면 defineExpose 컴파일러 매크로를 사용해야 합니다:
+
+  script단에서 작성한 변수같은걸 이 함수로 내보낸다
+
+
+ ###  useSlots() & useAttrs()#
+import { useSlots, useAttrs } from 'vue' - 선언해서
+
+<script setup> 내부에서 slots 및 attrs 사용은 템플릿에서 $slots 및 $attrs로 직접 접근할 수 있으므로 비교적 드물게 사용해야 합니다. 드물게 필요한 경우 useSlots 및 useAttrs 헬퍼를 각각 사용합니다:
+
+
+
+<script setup>은 일반 <script>와 함께 사용할 수 있습니다. 다음을 수행해야 하는 경우 일반 <script>가 필요할 수 있습니다:
+
+  지원되지 않는 시나리오 중 하나에 해당하는 경우 <script setup>을 사용하는 대신 명시적인 setup() 함수로 전환하는 것을 고려해야 합니다.
+
+    즉 script setup이랑 script 같이 사용가능하지만 같이 사용해야 경우가 하나라도 있다면 script 에 setup()함수로 바꿔 사용하자 하나로 사용하자라는 뜻
+
+    사용해야 경우에 대한 3가지정도는 공식문서 에 있음
+
+    최상위 await#
+최상위 await는 <script setup> 내에서 사용할 수 있습니다. 결과 코드는 async setup()으로 컴파일됩니다:
+
+
+  참고 - async setup()은 현재 실험적인 기능인 Suspense와 함께 사용해야 합니다.
+
+  ts전용 기능
+  타입 전용 props/emit 선언#
+Props 및 emits는 리터럴 타입 인자를 defineProps 또는 defineEmits에 전달하여 순수 타입 문법을 사용하여 선언할 수도 있습니다:
+
+ts
+const props = defineProps<{
+  foo: string
+  bar?: number
+}>()
+
+const emit = defineEmits<{
+  (e: 'change', id: number): void
+  (e: 'update', value: string): void
+}>()
+
+
+제한사항
+모듈 실행 의미의 차이로 인해 <script setup> 내부의 코드는 SFC의 컨텍스트에 의존합니다. 외부 .js 또는 .ts 파일로 이동하면 개발자와 개발도구 모두에 혼란을 초래할 수 있습니다. 따라서 **<script setup>**는 src 속성과 함께 사용할 수 없습니다.
+
+
+  css
+  ![alt text](image-10.png)
+
+  scoped건건 postcss로 인해? 인지 vue자체옵션때문인지(vue 자체옵션이 postcss가 설정해줘서일수도) 
+  빌드될때 scoped건건 사진처럼 class에 해당 클래스뿐아니라 뒤에 data어쩌구가 붙어서 빌드될때 다른 클래스랑 겹치거나 될 일이 없다 data어쩌구가 붙어서 scoped로 인해
+
+  자식 컴포넌트 루트 엘리먼트#
+scoped를 사용하면 부모 컴포넌트의 스타일이 자식 컴포넌트로 누출되지 않습니다. 그러나 자식 컴포넌트의 루트 노드는 부모의 범위가 지정된 CSS와 자식의 범위가 지정된 CSS 모두의 영향을 받습니다. 이것은 부모가 레이아웃 목적으로 자식 루트 엘리먼트의 스타일을 지정할 수 있도록 의도적으로 설계된 것입니다:
